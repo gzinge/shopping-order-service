@@ -1,5 +1,7 @@
 package com.shopping.order.service;
 
+import com.shopping.order.feignclient.ItemFeignClient;
+import com.shopping.order.feignclient.UserFeignClient;
 import com.shopping.order.model.*;
 import com.shopping.order.repository.OrderItemRepository;
 import com.shopping.order.repository.OrderRepository;
@@ -7,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
@@ -17,13 +18,16 @@ public class OrderBS implements OrderBSI {
     Logger logger = LoggerFactory.getLogger(OrderBS.class);
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
     private OrderRepository orderRepository;
 
     @Autowired
     private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ItemFeignClient itemFeignClient;
+
+    @Autowired
+    private UserFeignClient userFeignClient;
 
     @Override
     public int createOrder(List<ItemData> orderData, Long userId) throws Exception {
@@ -72,12 +76,12 @@ public class OrderBS implements OrderBSI {
 
     }
 
-    private Item getItemByIdFromItemService(Long itemId) {
-        return restTemplate.getForObject("http://localhost:58007/item/id/" + itemId, Item.class);
+    public Item getItemByIdFromItemService(Long itemId) {
+        return itemFeignClient.getItemByIdFromItemService(itemId);
     }
 
-    private User getUserByIdFromUserService(Long userId) {
-        return restTemplate.getForObject("http://localhost:58009/user/userId/" + userId, User.class);
+    public User getUserByIdFromUserService(Long userId) {
+        return userFeignClient.getUserByIdFromUserService(userId);
     }
 
     @Override
